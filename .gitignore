@@ -1,1 +1,6 @@
 .env
+.DS_Store
+.downloads/
+.tools/
+logs/
+var/

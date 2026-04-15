@@ -1,42 +1,45 @@
 # jenkins-infra
 
-Reusable Jenkins server setup for local development with Podman on macOS.
+Reusable Jenkins server setup for local development on macOS.
 
-This repo is meant to host the Jenkins server itself. Your application repos stay
-separate and keep only their own `Jenkinsfile`.
+This repo hosts the Jenkins server itself. Application repos stay separate and
+keep only their own `Jenkinsfile`.
+
+For the current hackathon setup, the primary application repo is the BSF-first
+`hackathon-ci-demo` project. Its `Jenkinsfile` validates the BSF backend and is
+intended to showcase Codex-assisted implementation plus Jenkins-based trust.
+
+Detailed documentation lives here:
+
+- `docs/local-jenkins-pipeline-guide.md`
+- `docs/local-jenkins-pipeline-guide.html`
 
 ## What Lives Here
 
-- Jenkins server container build
+- Jenkins server bootstrap scripts
 - Jenkins plugins list
 - Jenkins Configuration as Code
-- Local runtime settings for Podman
+- local runtime helpers
+- optional container backup files
 
 ## What Stays In Each App Repo
 
 - application source code
 - tests
 - `Jenkinsfile`
+- repo-specific Codex skill assets when used by the project
 
-That means one Jenkins server can run jobs for many repositories.
+## Primary Path: Run Jenkins Directly On This Laptop
 
-## Prerequisites
+This is the main path for the BSF demo. Jenkins runs directly on macOS without
+requiring the optional container backup path.
 
-1. Install Podman on macOS
-2. Start the Podman VM
-
-Example commands after Podman is installed:
-
-```bash
-podman machine init
-podman machine start
-```
-
-## First-Time Startup
+### 1. Start Jenkins locally
 
 ```bash
-cp .env.example .env
-podman compose up -d --build
+cd /Users/anil/Documents/anil/jenkins-infra
+chmod +x scripts/*.sh
+./scripts/start-jenkins-local.sh
 ```
 
 Open Jenkins at:
@@ -45,52 +48,56 @@ Open Jenkins at:
 http://localhost:8080/
 ```
 
-Default login:
-- Username: `admin`
-- Password: value from `.env`
+### 2. Complete first-time Jenkins setup
 
-## Create Pipeline Jobs For App Repos
+On first launch, Jenkins shows the setup wizard. Use it to:
 
-For each application repo:
-
-1. Create a new Jenkins **Pipeline** job.
-2. Choose **Pipeline script from SCM**.
-3. Set the repo URL to the application repository.
-4. Set branch to `*/main` or your target branch.
-5. Set script path to `Jenkinsfile`.
-6. Enable **Build when a change is pushed to GitHub**.
-
-This Jenkins server can host multiple jobs, one per repository.
-
-## GitHub Webhook Setup
-
-GitHub must be able to reach your Jenkins URL.
-
-Webhook payload URL:
-
-```text
-http://<your-public-jenkins-url>/github-webhook/
-```
-
-If Jenkins runs only on your laptop, expose it with a public tunnel and use that
-public URL both in Jenkins and in the GitHub webhook.
-
-## Useful Commands
-
-Start server:
+1. Unlock Jenkins with the initial admin password from:
 
 ```bash
-podman compose up -d --build
+cat /Users/anil/Documents/anil/jenkins-infra/var/jenkins_home/secrets/initialAdminPassword
 ```
 
-Stop server:
+2. Install the suggested plugins
+3. Create your admin user
 
-```bash
-podman compose down
-```
+### 3. Create the BSF pipeline job
 
-Reset Jenkins state:
+For `hackathon-ci-demo`, create a Jenkins `Pipeline` job with:
 
-```bash
-podman compose down -v
-```
+- Definition: `Pipeline script from SCM`
+- Repository URL: `https://github.com/anilneeluru09/hackathon-ci-demo.git`
+- Branch: `*/main`
+- Script path: `Jenkinsfile`
+
+### 4. What the BSF pipeline does
+
+The app repo pipeline:
+
+1. checks out the repo
+2. runs `./ci/run_bsf_backend_tests.sh`
+3. bootstraps Java 21, Maven, and MongoDB inside the repo workspace
+4. runs the BSF backend Maven test suite
+5. publishes JUnit results from `reports/junit/*.xml`
+
+### 5. Automatic commit detection
+
+The pipeline uses `pollSCM('H/2 * * * *')`, so Jenkins can detect new commits
+roughly every two minutes even without a public webhook URL.
+
+Test flow:
+
+1. Run `Build Now` once
+2. Push a new commit to GitHub
+3. Wait up to about 2 minutes
+4. Confirm Jenkins starts the next build automatically
+
+## Why This Matters For The Demo
+
+This setup helps demonstrate that Codex was used for more than one-off coding:
+
+- the application repo contains a repo-specific Codex skill
+- the BSF implementation and CI flow are kept in sync
+- Jenkins validates future commits automatically
+
+That makes the demo about development workflow, integration, and trust.

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Local Jenkins Pipeline Guide</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f1e8;
+      --panel: #fffdf9;
+      --ink: #1f1b16;
+      --muted: #6a6258;
+      --accent: #0d5c63;
+      --border: #d8cec1;
+      --code: #f0e7da;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Iowan Old Style", "Palatino Linotype", serif;
+      background: linear-gradient(180deg, #efe6d5 0%, var(--bg) 100%);
+      color: var(--ink);
+    }
+
+    main {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    section,
+    header {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 30px rgba(31, 27, 22, 0.06);
+    }
+
+    h1, h2 {
+      margin-top: 0;
+      font-family: "Avenir Next", "Helvetica Neue", sans-serif;
+    }
+
+    p, li {
+      line-height: 1.6;
+    }
+
+    code, pre {
+      font-family: "SFMono-Regular", "Menlo", monospace;
+      background: var(--code);
+    }
+
+    code {
+      padding: 0.1rem 0.3rem;
+      border-radius: 6px;
+    }
+
+    pre {
+      padding: 14px;
+      border-radius: 12px;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      font-family: "Avenir Next", "Helvetica Neue", sans-serif;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">BSF + Jenkins</div>
+      <h1>Local Jenkins Pipeline Guide</h1>
+      <p>
+        This guide explains how the local Jenkins server is used with the
+        BSF-first <code>hackathon-ci-demo</code> repository and how that setup
+        supports a Codex hackathon demo on macOS.
+      </p>
+    </header>
+
+    <section>
+      <h2>Current Architecture</h2>
+      <p>The setup is split into two repositories:</p>
+      <ul>
+        <li><code>hackathon-ci-demo</code>: BSF implementation, repo-local Codex skill assets, and root <code>Jenkinsfile</code></li>
+        <li><code>jenkins-infra</code>: Jenkins bootstrap scripts, runtime notes, and optional backup files</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>How Jenkins Starts</h2>
+      <p>Start Jenkins directly on the macOS laptop with:</p>
+      <pre><code>./scripts/start-jenkins-local.sh</code></pre>
+      <p>That script downloads a local Java runtime, downloads the Jenkins LTS WAR, and starts Jenkins with a repo-local <code>JENKINS_HOME</code>.</p>
+    </section>
+
+    <section>
+      <h2>How The BSF Repo Is Integrated</h2>
+      <p>Create a Jenkins <code>Pipeline</code> job using:</p>
+      <ul>
+        <li>Repository URL: <code>https://github.com/anilneeluru09/hackathon-ci-demo.git</code></li>
+        <li>Branch: <code>*/main</code></li>
+        <li>Script path: <code>Jenkinsfile</code></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>What The Pipeline Does</h2>
+      <ol>
+        <li>Prevents concurrent builds.</li>
+        <li>Polls SCM every two minutes with <code>pollSCM('H/2 * * * *')</code>.</li>
+        <li>Checks out the repository.</li>
+        <li>Runs <code>./ci/run_bsf_backend_tests.sh</code>.</li>
+        <li>Bootstraps Java 21, Maven, and MongoDB inside the workspace.</li>
+        <li>Runs Maven tests from <code>BSF_NF/backend/pom.xml</code>.</li>
+        <li>Publishes JUnit results from <code>reports/junit/*.xml</code>.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Why This Fits The Demo</h2>
+      <p>
+        The local demo flow stays focused on
+        <code>BSF_NF/scripts/start-all.sh</code>, while Jenkins uses the
+        dedicated CI helper <code>./ci/run_bsf_backend_tests.sh</code>. That
+        keeps the macOS demo path easy to run and the CI story easy to explain.
+      </p>
+      <p>
+        It also supports the hackathon narrative that Codex helped with
+        implementation, integration, and CI alignment rather than only writing
+        code snippets.
+      </p>
+    </section>
+
+    <section>
+      <h2>Validation Flow</h2>
+      <ol>
+        <li>Run one manual Jenkins build.</li>
+        <li>Push a new commit to GitHub.</li>
+        <li>Wait up to about two minutes.</li>
+        <li>Confirm Jenkins starts a new build automatically.</li>
+      </ol>
+    </section>
+  </main>
+</body>
+</html>
