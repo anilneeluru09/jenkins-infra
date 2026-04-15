@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jenkins-infra Executive Overview</title>
+  <style>
+    :root {
+      --bg: #0f1b24;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-strong: #ffffff;
+      --ink: #12212a;
+      --muted: #5c6f78;
+      --line: rgba(18, 33, 42, 0.12);
+      --teal: #0f8b8d;
+      --teal-soft: rgba(15, 139, 141, 0.12);
+      --blue: #2d6cdf;
+      --gold: #f4b942;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(45, 108, 223, 0.24), transparent 24%),
+        radial-gradient(circle at 90% 20%, rgba(15, 139, 141, 0.22), transparent 20%),
+        radial-gradient(circle at 55% 100%, rgba(244, 185, 66, 0.14), transparent 28%),
+        linear-gradient(180deg, #122434 0%, var(--bg) 100%);
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 36px 20px 72px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 30px;
+      padding: 42px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(247, 252, 255, 0.92)),
+        linear-gradient(135deg, rgba(15, 139, 141, 0.16), transparent);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      margin-bottom: 24px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      right: -90px;
+      top: -110px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(15, 139, 141, 0.28), transparent 68%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--teal);
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0 0 14px;
+      line-height: 1.05;
+      font-family: "Iowan Old Style", "Palatino Linotype", serif;
+      font-weight: 700;
+    }
+
+    h1 {
+      font-size: clamp(44px, 7vw, 78px);
+      max-width: 8ch;
+    }
+
+    h2 {
+      font-size: 30px;
+    }
+
+    h3 {
+      font-size: 20px;
+    }
+
+    p,
+    li {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 17px;
+      margin: 0;
+    }
+
+    .hero-copy {
+      max-width: 760px;
+    }
+
+    .hero-copy p {
+      font-size: 20px;
+      max-width: 62ch;
+    }
+
+    .hero-strip {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 22px;
+      margin-top: 28px;
+    }
+
+    .note,
+    .scorecard,
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(18, 33, 42, 0.08);
+      border-radius: 24px;
+      box-shadow: 0 14px 40px rgba(18, 33, 42, 0.08);
+    }
+
+    .note {
+      padding: 22px;
+      background: linear-gradient(135deg, rgba(15, 139, 141, 0.12), rgba(255, 255, 255, 0.95));
+    }
+
+    .scorecard {
+      padding: 22px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric {
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid var(--line);
+    }
+
+    .metric .label {
+      display: block;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .metric .value {
+      display: block;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .panel {
+      padding: 28px;
+      background: var(--panel-strong);
+    }
+
+    .ribbon {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: #155b5c;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .bullets {
+      display: grid;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .bullet {
+      display: grid;
+      grid-template-columns: 14px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      margin-top: 6px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+    }
+
+    .swimlane {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .lane {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 16px;
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #f8fbfc);
+    }
+
+    .lane-title {
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--teal);
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .lane strong {
+      display: block;
+      font-size: 20px;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .command {
+      padding: 18px;
+      border-radius: 20px;
+      background: #131f29;
+      color: #e8f2f7;
+      overflow-x: auto;
+      font-family: "SFMono-Regular", "Menlo", monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-top: 16px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .tick {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .tick-badge {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 800;
+      font-size: 18px;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      box-shadow: 0 10px 24px rgba(45, 108, 223, 0.24);
+    }
+
+    code {
+      font-family: "SFMono-Regular", "Menlo", monospace;
+      background: #eef5f8;
+      border-radius: 8px;
+      padding: 2px 6px;
+      color: #244857;
+    }
+
+    @media (max-width: 980px) {
+      .hero-strip,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .lane {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .hero,
+      .panel,
+      .note,
+      .scorecard {
+        padding: 22px;
+      }
+
+      .scorecard {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Executive Overview</div>
+        <h1>jenkins-infra</h1>
+        <p>
+          The reusable Jenkins host for the BSF hackathon demo. This repo keeps
+          the CI server, local bootstrap flow, and operating instructions in one
+          place so application repos can stay focused on code, tests, and their
+          own pipeline definitions.
+        </p>
+      </div>
+
+      <div class="hero-strip">
+        <div class="note">
+          <div class="ribbon">Why Executives Care</div>
+          <p>
+            This repo is the reliability layer for the demo. It turns Codex-led
+            implementation work in <code>hackathon-ci-demo</code> into an
+            auditable engineering workflow by running Jenkins locally, tracking
+            the right repo, and validating new commits on a repeatable schedule.
+          </p>
+        </div>
+
+        <div class="scorecard">
+          <div class="metric">
+            <span class="label">Runtime</span>
+            <span class="value">Local macOS</span>
+          </div>
+          <div class="metric">
+            <span class="label">Main Job</span>
+            <span class="value">BSF Pipeline</span>
+          </div>
+          <div class="metric">
+            <span class="label">Primary Port</span>
+            <span class="value">8080</span>
+          </div>
+          <div class="metric">
+            <span class="label">Trigger Mode</span>
+            <span class="value">SCM Polling</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <div class="ribbon">Operating Role</div>
+        <h2>What This Repo Owns</h2>
+        <div class="bullets">
+          <div class="bullet">
+            <div class="dot"></div>
+            <p>Local Jenkins bootstrap scripts for fast setup on a demo laptop</p>
+          </div>
+          <div class="bullet">
+            <div class="dot"></div>
+            <p>Jenkins runtime state, plugins, and configuration-as-code assets</p>
+          </div>
+          <div class="bullet">
+            <div class="dot"></div>
+            <p>Operator-facing runbooks for first-time setup, rebuild, and recovery</p>
+          </div>
+          <div class="bullet">
+            <div class="dot"></div>
+            <p>An optional backup container path without making the main demo depend on it</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="ribbon">Strategic Separation</div>
+        <h2>Why This Design Is Better</h2>
+        <div class="bullets">
+          <div class="bullet">
+            <div class="dot"></div>
+            <p>Application repos keep only code, tests, skills, and their own <code>Jenkinsfile</code></p>
+          </div>
+          <div class="bullet">
+            <div class="dot"></div>
+            <p>Jenkins becomes reusable across multiple projects instead of being embedded in one repo</p>
+          </div>
+          <div class="bullet">
+            <div class="dot"></div>
+            <p>The hackathon story is cleaner: Codex builds the app, Jenkins independently validates it</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel" style="margin-top:24px;">
+      <div class="ribbon">Integration Swimlane</div>
+      <h2>How It Works With hackathon-ci-demo</h2>
+      <div class="swimlane">
+        <div class="lane">
+          <div>
+            <div class="lane-title">Infrastructure</div>
+            <strong>Start Jenkins locally</strong>
+            <p>Boot Jenkins from this repo on the demo laptop.</p>
+          </div>
+          <div>
+            <div class="command">cd /Users/anil/Documents/anil/jenkins-infra
+chmod +x scripts/*.sh
+./scripts/start-jenkins-local.sh</div>
+          </div>
+        </div>
+
+        <div class="lane">
+          <div>
+            <div class="lane-title">Job Config</div>
+            <strong>Track the BSF repo</strong>
+            <p>Use Pipeline-from-SCM against <code>hackathon-ci-demo</code> on <code>main</code>.</p>
+          </div>
+          <div>
+            <p>
+              Repo URL: <code>https://github.com/anilneeluru09/hackathon-ci-demo.git</code><br>
+              Branch: <code>*/main</code><br>
+              Script path: <code>Jenkinsfile</code>
+            </p>
+          </div>
+        </div>
+
+        <div class="lane">
+          <div>
+            <div class="lane-title">Validation</div>
+            <strong>Run the BSF test path</strong>
+            <p>The application repo owns the actual build-and-test flow.</p>
+          </div>
+          <div>
+            <p>
+              Jenkins runs <code>./ci/run_bsf_backend_tests.sh</code>, which
+              bootstraps Java, Maven, and MongoDB inside the app repo workspace
+              and publishes JUnit from <code>reports/junit/*.xml</code>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <div class="ribbon">Why pollSCM</div>
+        <h2>Designed For A Laptop Demo</h2>
+        <p>
+          Jenkins is running on <code>localhost</code>, so public webhooks are
+          not required. The BSF job uses <code>pollSCM('H/2 * * * *')</code> to
+          detect new commits roughly every two minutes, which keeps the setup
+          reliable without introducing tunnel or hosting complexity.
+        </p>
+      </article>
+
+      <article class="panel">
+        <div class="ribbon">Risk Posture</div>
+        <h2>What This Repo Reduces</h2>
+        <div class="bullets">
+          <div class="bullet">
+            <div class="dot"></div>
+            <p>Reduces setup fragility by keeping Jenkins state inside the repo layout</p>
+          </div>
+          <div class="bullet">
+            <div class="dot"></div>
+            <p>Reduces story confusion by separating app concerns from CI host concerns</p>
+          </div>
+          <div class="bullet">
+            <div class="dot"></div>
+            <p>Reduces demo risk by favoring a direct local path over a heavier container dependency</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel" style="margin-top:24px;">
+      <div class="ribbon">Presenter Flow</div>
+      <h2>How To Explain It Live</h2>
+      <div class="timeline">
+        <div class="tick">
+          <div class="tick-badge">1</div>
+          <div>
+            <h3>Start With Separation</h3>
+            <p>
+              “The BSF app repo owns code, tests, skills, and the pipeline file.
+              This repo owns Jenkins itself.”
+            </p>
+          </div>
+        </div>
+        <div class="tick">
+          <div class="tick-badge">2</div>
+          <div>
+            <h3>Show The Runtime</h3>
+            <p>
+              “We can bring Jenkins up locally on the same laptop and point it
+              at the BSF repo in minutes.”
+            </p>
+          </div>
+        </div>
+        <div class="tick">
+          <div class="tick-badge">3</div>
+          <div>
+            <h3>Land On Trust</h3>
+            <p>
+              “Codex helps with implementation and workflow intelligence, while
+              Jenkins remains the independent validation layer.”
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

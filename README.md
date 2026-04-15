@@ -13,6 +13,8 @@ Detailed documentation lives here:
 
 - `docs/local-jenkins-pipeline-guide.md`
 - `docs/local-jenkins-pipeline-guide.html`
+- `docs/project-overview.html`
+- `docs/project-overview-executive.html`
 
 ## What Lives Here
 

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jenkins-infra Overview</title>
+  <style>
+    :root {
+      --bg: #edf2f3;
+      --paper: #ffffff;
+      --ink: #13232a;
+      --muted: #5d7077;
+      --line: #cfdce0;
+      --accent: #0e6d64;
+      --accent-soft: #d9f0ec;
+      --accent-2: #24577a;
+      --chip: #e8f3f6;
+      --code: #f2f7f8;
+      --shadow: 0 14px 42px rgba(18, 35, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(14, 109, 100, 0.12), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(36, 87, 122, 0.12), transparent 24%),
+        linear-gradient(180deg, #f9fbfb 0%, var(--bg) 100%);
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 36px 20px 72px;
+    }
+
+    .hero,
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 34px;
+      display: grid;
+      grid-template-columns: 1.4fr 0.95fr;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0 0 14px;
+      line-height: 1.1;
+      font-family: "Iowan Old Style", "Palatino Linotype", serif;
+    }
+
+    h1 {
+      font-size: clamp(38px, 5vw, 60px);
+      max-width: 9ch;
+    }
+
+    h2 {
+      font-size: 28px;
+    }
+
+    h3 {
+      font-size: 20px;
+    }
+
+    p,
+    li {
+      margin: 0;
+      line-height: 1.6;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .hero p {
+      font-size: 19px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--chip);
+      border: 1px solid #c8dfe5;
+      color: #2a5365;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .callout {
+      border-radius: 18px;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--accent-soft), #eef8f6);
+      border: 1px solid #bdded6;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .stat {
+      border-radius: 18px;
+      padding: 15px;
+      background: #fbfefe;
+      border: 1px solid var(--line);
+    }
+
+    .stat .label {
+      display: block;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat .value {
+      display: block;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .panel {
+      padding: 28px;
+    }
+
+    .grid + .grid,
+    .panel + .panel,
+    .grid + .panel {
+      margin-top: 22px;
+    }
+
+    ul,
+    ol {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    code {
+      font-family: "SFMono-Regular", "Menlo", monospace;
+      background: var(--code);
+      padding: 2px 6px;
+      border-radius: 8px;
+      color: #26424d;
+      font-size: 0.95em;
+    }
+
+    pre {
+      margin: 0;
+      padding: 18px;
+      overflow-x: auto;
+      border-radius: 18px;
+      background: var(--code);
+      border: 1px solid var(--line);
+      color: #26424d;
+      font-family: "SFMono-Regular", "Menlo", monospace;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .steps {
+      display: grid;
+      gap: 12px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 14px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .step:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .step-number {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: #184c5a;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .hero,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero,
+      .panel {
+        padding: 22px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Local Jenkins Host</div>
+        <h1>jenkins-infra</h1>
+        <p>
+          A reusable Jenkins server repo for local macOS development. It hosts
+          the Jenkins runtime, bootstrap scripts, and operator documentation,
+          while application repos keep only their own code, tests, and
+          <code>Jenkinsfile</code>.
+        </p>
+        <div class="chips">
+          <span class="chip">Local Jenkins</span>
+          <span class="chip">macOS Bootstrap</span>
+          <span class="chip">BSF CI Host</span>
+          <span class="chip">Podman Backup Path</span>
+        </div>
+      </div>
+      <aside>
+        <div class="callout">
+          <div class="eyebrow">Role In The Demo</div>
+          <p>
+            This repo is the infrastructure side of the hackathon story. It
+            keeps Jenkins reusable and separate, so the BSF app repo can focus
+            on application logic, Codex skill assets, and its own pipeline.
+          </p>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <span class="label">Primary URL</span>
+            <span class="value">:8080</span>
+          </div>
+          <div class="stat">
+            <span class="label">Main App Repo</span>
+            <span class="value">hackathon-ci-demo</span>
+          </div>
+          <div class="stat">
+            <span class="label">Jenkins Home</span>
+            <span class="value">var/</span>
+          </div>
+          <div class="stat">
+            <span class="label">Job Style</span>
+            <span class="value">Pipeline</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <div class="eyebrow">What Lives Here</div>
+        <h2>Infrastructure Responsibilities</h2>
+        <ul>
+          <li>Jenkins bootstrap scripts for local macOS use</li>
+          <li>Jenkins plugins and Configuration as Code files</li>
+          <li>operator-facing docs for setup and recovery</li>
+          <li>an optional container-based backup path</li>
+        </ul>
+      </article>
+      <article class="panel">
+        <div class="eyebrow">What Stays Elsewhere</div>
+        <h2>Application Repo Responsibilities</h2>
+        <ul>
+          <li>application source code</li>
+          <li>tests</li>
+          <li>repo-specific Codex skill assets</li>
+          <li>the root <code>Jenkinsfile</code></li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <div class="eyebrow">Primary Path</div>
+        <h2>Start Jenkins On This Laptop</h2>
+        <pre>cd /Users/anil/Documents/anil/jenkins-infra
+chmod +x scripts/*.sh
+./scripts/start-jenkins-local.sh</pre>
+        <p>
+          Jenkins runs directly on macOS with a repo-local
+          <code>JENKINS_HOME</code>. This keeps the setup easy to move and easy
+          to demo.
+        </p>
+      </article>
+      <article class="panel">
+        <div class="eyebrow">First-Time Setup</div>
+        <h2>Open And Initialize</h2>
+        <pre>http://localhost:8080
+
+cat var/jenkins_home/secrets/initialAdminPassword</pre>
+        <ul>
+          <li>unlock Jenkins</li>
+          <li>install suggested plugins</li>
+          <li>create the admin user</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="eyebrow">Integration Flow</div>
+      <h2>How It Connects To hackathon-ci-demo</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div>
+            <h3>Create A Pipeline Job</h3>
+            <p>
+              Point Jenkins at
+              <code>https://github.com/anilneeluru09/hackathon-ci-demo.git</code>
+              using <code>Pipeline script from SCM</code>.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div>
+            <h3>Track main</h3>
+            <p>
+              Use branch <code>*/main</code> and script path
+              <code>Jenkinsfile</code>.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div>
+            <h3>Run The BSF Pipeline</h3>
+            <p>
+              The app repo executes <code>./ci/run_bsf_backend_tests.sh</code>,
+              which bootstraps Java, Maven, and MongoDB inside the repo
+              workspace.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div>
+            <h3>Publish Results</h3>
+            <p>
+              Jenkins publishes JUnit results from
+              <code>reports/junit/*.xml</code> and archives generated report
+              artifacts.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <div class="eyebrow">Polling Model</div>
+        <h2>Why pollSCM Is Used</h2>
+        <ul>
+          <li>the Jenkins server is running on a laptop</li>
+          <li>GitHub cannot call a webhook on <code>localhost</code></li>
+          <li><code>pollSCM('H/2 * * * *')</code> keeps demo triggering simple</li>
+          <li>new commits are detected roughly every two minutes</li>
+        </ul>
+      </article>
+      <article class="panel">
+        <div class="eyebrow">Demo Value</div>
+        <h2>Why This Repo Exists</h2>
+        <ul>
+          <li>keeps Jenkins reusable across multiple repositories</li>
+          <li>lets the BSF repo stay focused on product and workflow logic</li>
+          <li>supports a clear hackathon message about development plus trust</li>
+          <li>makes recovery on a new machine much easier</li>
+        </ul>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
